@@ -57,9 +57,7 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=1.0, top_p=1.0, toke
 
 def find_number(s):
     for i in range(len(s)):
-        if s[i].isdigit():
-            return s[i:]
-        return None
+        return s[i:] if s[i].isdigit() else None
     
 def remove_linebreaks(s):
     return re.sub(r'[\r\n]+', '', s)
@@ -81,7 +79,7 @@ if __name__ == '__main__':
     print("to spark the ideas")
     print("You can create multiple stories at a time")
     #print("This code will create two files per story: a detailed breakdown, and a short summary")
-    
+
     #ask for genre
     storytype=input("Genre or type of story (leave blank if you like):")
     #ask for supporting files
@@ -106,13 +104,13 @@ if __name__ == '__main__':
         root.destroy()
         #load file
         supportingfiles=supportingfiles+ftext+"\n"
-        
+
         an=input("Load Another(y/n)?")
         if an=="n":
             break
     if supportingfiles=="":
         supportingfiles=="Intelligent, original storyline with large amounts of colour and detail."
-        
+
     #ask for tweaks
     print("Now you can add any additional info.  This can be a short description")
     print("eg.  'a kids story about robots'")
@@ -121,61 +119,61 @@ if __name__ == '__main__':
     tweak=""
     tweak=input("Additional Story information?")
     if tweak !="":
-        tweak="Make the story "+tweak
-  
+        tweak = f"Make the story {tweak}"
+
     #ask for folder
     nul=input("choose a folder to save the storylines (hit return to continue)")
     root = Tk()
     root.attributes("-topmost", True)
     folder_location = tk.filedialog.askdirectory()
     root.destroy()
-    print ("Folder chosen: "+folder_location)
-    
+    print(f"Folder chosen: {folder_location}")
+
     #ask how many characters
     chars=1
     ch=input("How many stories shall we brainstorm?")
     chars=int(ch)
-    
+
     #ask for a title
     title=input("Story Title:")
-   
+
     #load in prompt and assemble
     folder = "planprompts/"
     filename = "synopsisprompt.txt"
     filepath = os.path.join(folder, filename)
     with open(filepath, "r") as f:
-         prompt = f.read() 
+         prompt = f.read()
     prompt = prompt.replace('<<STORYTYPE>>', storytype).replace('<<SUPPORTINGFILES>>', supportingfiles).replace('<<TWEAK>>', tweak)
-    
+
     #call gpt3
     for char in range (1,chars+1):
-     print("Querying GPT3..........................................")   
-     completion1 = gpt3_completion(prompt)
-     #get story name
-     completion1="The story begins "+completion1
-     completion1 = completion1.replace(r'\n', '\n\n')
-     name=title+str(char)+".txt"
-     print("File title:"+name)
-     print(completion1)
-     #create scene breakdown
-     #folder = "planprompts/"
-     #filepath = os.path.join(folder, "synopsistoscenelist_multi.txt")
-     #with open(filepath, "r") as f:
-     #  prompt8 = f.read() 
-     
-     #3 run the prompt
-     #scriptprompt= prompt8.replace('<<STORYTYPE>>', storytype).replace('<<SUPPORTINGFILES>>', supportingfiles).replace('<<TWEAK>>', tweak).replace('<<SYNOPSIS>>', completion1)
-     #print("QUERYING GPT3_____________________________________")
-     #completion8="frogspawn"
-     #completion8 = gpt3_completion(scriptprompt)
-     #completion8 = completion8.replace(r'\n', '\n')
-     #completion8="SCENE001:"+completion8
-     #print(completion8)
-       
-     #save files
-     filepath = os.path.join(folder_location, "synopsis_"+name)
-     with open(filepath,"w",encoding="utf-8") as f:
-         f.write(completion1)
+        print("Querying GPT3..........................................")
+        completion1 = gpt3_completion(prompt)
+             #get story name
+        completion1 = f"The story begins {completion1}"
+        completion1 = completion1.replace(r'\n', '\n\n')
+        name=title+str(char)+".txt"
+        print(f"File title:{name}")
+        print(completion1)
+             #create scene breakdown
+             #folder = "planprompts/"
+             #filepath = os.path.join(folder, "synopsistoscenelist_multi.txt")
+             #with open(filepath, "r") as f:
+             #  prompt8 = f.read() 
+             
+             #3 run the prompt
+             #scriptprompt= prompt8.replace('<<STORYTYPE>>', storytype).replace('<<SUPPORTINGFILES>>', supportingfiles).replace('<<TWEAK>>', tweak).replace('<<SYNOPSIS>>', completion1)
+             #print("QUERYING GPT3_____________________________________")
+             #completion8="frogspawn"
+             #completion8 = gpt3_completion(scriptprompt)
+             #completion8 = completion8.replace(r'\n', '\n')
+             #completion8="SCENE001:"+completion8
+             #print(completion8)
+               
+             #save files
+        filepath = os.path.join(folder_location, f"synopsis_{name}")
+        with open(filepath,"w",encoding="utf-8") as f:
+            f.write(completion1)
      #filepath = os.path.join(folder_location, "story_breakdown_"+name)
      #with open(filepath,"w",encoding="utf-8") as f:
      #    f.write(completion8)   

@@ -44,10 +44,9 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=1.0, top_p=1.0, toke
                 frequency_penalty=freq_pen,
                 presence_penalty=pres_pen,
                 stop=stop)
-            text = response['choices'][0]['text'].strip()
             #text = re.sub('\s+', ' ', text)
             #save_gpt3_log(prompt, text)
-            return text
+            return response['choices'][0]['text'].strip()
         except Exception as oops:
             retry += 1
             if retry >= max_retry:
@@ -60,25 +59,22 @@ if __name__ == '__main__':
     print("This code takes a scene list and splits it into individual files by scene number.")
     print("You'll need a txt file containing a synopsis of each scene, numbered SCENE001, SCENE002, SCENE003, etc.  Capitals and numbering matter!!")
     getcha= input("choose a scene list to split(y/n):")
+    #print (root.filename)
+    completion7=""
     if getcha != "n":
         root = Tk()
         root.filename =  askopenfilename(initialdir = "/",title = "Select scene file",filetypes = (("text files","*.txt"),("all files","*.*")))
-        #print (root.filename)
-        completion7=""
         with open(root.filename, "r") as f:
             completion7 = f.read()
             root.destroy()
-    else:
-                completion7=""  
-    
     #get folder for storing scenes
     bg=input("pick a folder to store your scenes:")
     if bg !="4535":
        root = Tk()
        root.withdraw()
        folder = filedialog.askdirectory()
-                
-    
+
+
     print('Primer file (this is a file to include in each scene which gives basic info on character/world, etc.')
     print('You don"t need it and you can add additional files to fine-tune each scene before writing.')
     print('However, it can help add detail (for example, about the world of the story, or the way characters behave)')
@@ -93,25 +89,25 @@ if __name__ == '__main__':
             scenename=os.path.basename(root.filename)
             folderpath=os. path. dirname(root.filename)
             root.destroy()
-    
+
     #divide scene list into files
     textu = completion7
     #textu="SCENE001 Doctor Who arrives on galifrey.  he exits the TARDIS SCENE002 The Master is watching via a hidden camera.  He is happy the doctor has arrived.  His plans are going to be fulfilled. SCENE003 Doctor Who has a conversation with the President.  The president has news about dark rumours about a threat to the whole universe.  This is why Doctor Who has been summoned.  Doctor Who is initially angry at having been summoned, but, when he hears the news, he agrees to help the Time Lords."
     textu = textu.replace('\r', '').replace('\n', '')
-    textu=textu+"END"
+    textu = f"{textu}END"
     print(textu)
     scenes = re.findall("SCENE\d\d\d", textu)
     #folder="scenes/"
     print(scenes)
     full_script=""
     for scene in scenes:
-         print(scene)
-         scene_text = re.search(scene + "(.*?)" + "(?=SCENE|END)", textu).group(1)
-         print(scene_text)
-     
-         filepath = os.path.join(folder, scene)
-         with open(filepath + ".txt","w") as f:
-             f.write(scene_text)
+        print(scene)
+        scene_text = re.search(f"{scene}(.*?)(?=SCENE|END)", textu)[1]
+        print(scene_text)
+
+        filepath = os.path.join(folder, scene)
+        with open(f"{filepath}.txt", "w") as f:
+            f.write(scene_text)
     #save primer file
     if primer !="":
         filepath = os.path.join(folder, "primer.txt")
