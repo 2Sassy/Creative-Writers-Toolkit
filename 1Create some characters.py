@@ -44,10 +44,9 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=1.0, top_p=1.0, toke
                 frequency_penalty=freq_pen,
                 presence_penalty=pres_pen,
                 stop=stop)
-            text = response['choices'][0]['text'].strip()
             #text = re.sub('\s+', ' ', text)
             #save_gpt3_log(prompt, text)
-            return text
+            return response['choices'][0]['text'].strip()
         except Exception as oops:
             retry += 1
             if retry >= max_retry:
@@ -57,9 +56,7 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=1.0, top_p=1.0, toke
 
 def find_number(s):
     for i in range(len(s)):
-        if s[i].isdigit():
-            return s[i:]
-        return None
+        return s[i:] if s[i].isdigit() else None
     
 def remove_linebreaks(s):
     return re.sub(r'[\r\n]+', '', s)
@@ -80,7 +77,7 @@ if __name__ == '__main__':
     print("to spark the ideas")
     print("You can create multiple characters at a time")
     print("This code will create two files per character: a detailed character breakdown, and a precis")
-    
+
     #ask for genre
     storytype=input("Genre or type of story your character will appear in (leave blank if you like):")
     #ask for supporting files
@@ -108,7 +105,7 @@ if __name__ == '__main__':
         an=input("Load Another(y/n)?")
         if an=="n":
             break
-        
+
     #ask for tweaks
     print("Now you can add any additional info.  This can be a short description")
     print("eg.  'a character you'd find in a murder mystery'")
@@ -117,57 +114,57 @@ if __name__ == '__main__':
     tweak=""
     tweak=input("Additional character information?")
     if tweak !="":
-        tweak="Make the character "+tweak
-  
+        tweak = f"Make the character {tweak}"
+
     #ask for folder
     nul=input("choose a folder to save the characters (hit return to continue)")
     root = Tk()
     root.attributes("-topmost", True)
     folder_location = tk.filedialog.askdirectory()
     root.destroy()
-    print ("Folder chosen: "+folder_location)
-    
+    print(f"Folder chosen: {folder_location}")
+
     #ask how many characters
     chars=1
     ch=input("How many characters shall we brainstorm?")
     chars=int(ch)
-   
+
     #load in prompt and assemble
     folder = "planprompts/"
     filename = "prompt01.txt"
     filepath = os.path.join(folder, filename)
     with open(filepath, "r") as f:
-         prompt = f.read() 
+         prompt = f.read()
     prompt = prompt.replace('<<STORYTYPE>>', storytype).replace('<<SUPPORTINGFILES>>', supportingfiles).replace('<<TWEAK>>', tweak)
-    
+
     #call gpt3
     for char in range (1,chars+1):
-     print("Querying GPT3..........................................")   
-     completion1 = gpt3_completion(prompt)
-     #get character name
-     completion1="1)"+completion1
-     completion1 = completion1.replace(r'\n', '\n\n')
-     name="000"
-     name = completion1[completion1.find("Name:")+len("Name:"):completion1.find("2)")]
-     name = remove_linebreaks(name)
-     name = remove_nonprintable(name)
-     name = remove_spaces(name)
-     if name == None:
-         name=""
-     name=name+str(char)+".txt"
-     print("character name:"+name)
-     print(completion1)
-     #create precis
-     print("Querying GPT3..........................................")   
-     completion2 = gpt3_completion("Create a brief, 1 pargagraph summary of the following character"+"\n"+ completion1+"\n"+name+"\nSUMMARY:")
-     print (completion2)
-     #save files
-     filepath = os.path.join(folder_location, name)
-     with open(filepath,"w",encoding="utf-8") as f:
-         f.write(completion1)
-     filepath = os.path.join(folder_location, "Precis_"+name)
-     with open(filepath,"w",encoding="utf-8") as f:
-         f.write(completion2)   
+        print("Querying GPT3..........................................")
+        completion1 = gpt3_completion(prompt)
+             #get character name
+        completion1 = f"1){completion1}"
+        completion1 = completion1.replace(r'\n', '\n\n')
+        name="000"
+        name = completion1[completion1.find("Name:")+len("Name:"):completion1.find("2)")]
+        name = remove_linebreaks(name)
+        name = remove_nonprintable(name)
+        name = remove_spaces(name)
+        if name is None:
+            name=""
+        name=name+str(char)+".txt"
+        print(f"character name:{name}")
+        print(completion1)
+        #create precis
+        print("Querying GPT3..........................................")
+        completion2 = gpt3_completion("Create a brief, 1 pargagraph summary of the following character"+"\n"+ completion1+"\n"+name+"\nSUMMARY:")
+        print (completion2)
+        #save files
+        filepath = os.path.join(folder_location, name)
+        with open(filepath,"w",encoding="utf-8") as f:
+            f.write(completion1)
+        filepath = os.path.join(folder_location, f"Precis_{name}")
+        with open(filepath,"w",encoding="utf-8") as f:
+            f.write(completion2)   
     
     #find character name and save detailed character
     #call gpt3 again to create precis and save

@@ -32,11 +32,11 @@ def isFileExists(filename):
 def four_digit_string(num):
     num_str = str(num)
     if len(num_str) == 1:
-        num_str = "000" + num_str
+        num_str = f"000{num_str}"
     elif len(num_str) == 2:
-        num_str = "00" + num_str
+        num_str = f"00{num_str}"
     elif len(num_str) == 3:
-        num_str = "0"+num_str
+        num_str = f"0{num_str}"
     return num_str
 
 def gpt3_completion(prompt, engine='text-davinci-002', temp=1.0, top_p=1.0, tokens=1000, freq_pen=0.5, pres_pen=0.0, stop=['asdfasdf']):
@@ -54,10 +54,9 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=1.0, top_p=1.0, toke
                 frequency_penalty=freq_pen,
                 presence_penalty=pres_pen,
                 stop=stop)
-            text = response['choices'][0]['text'].strip()
             #text = re.sub('\s+', ' ', text)
             #save_gpt3_log(prompt, text)
-            return text
+            return response['choices'][0]['text'].strip()
         except Exception as oops:
             retry += 1
             if retry >= max_retry:
@@ -67,9 +66,7 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=1.0, top_p=1.0, toke
 
 def find_number(s):
     for i in range(len(s)):
-        if s[i].isdigit():
-            return s[i:]
-        return None
+        return s[i:] if s[i].isdigit() else None
 
 if __name__ == '__main__':
     print("This code creates story structures from synopses")
@@ -78,16 +75,16 @@ if __name__ == '__main__':
     print("1 Break story down as 'Hero's Journey'")
     print( "2 Break story down as 'Save The Cat' beatsheet")
     print( "3 Break story down as '3 act structure'")
-    
+
     which=input("select 1,2 or 3: ")
-    if which=="1":
+    if which == "1":
         prompt="Break the above synopsis down using the 'Hero's Journey' method \nORDINARY WORLD:"
-    if which=="2":    
-        prompt="Break the above synopsis down as a 'Save The Cat' beatsheet \nOPENING IMAGE:"  
-    if which=="3":   
+    elif which == "2":
+        prompt="Break the above synopsis down as a 'Save The Cat' beatsheet \nOPENING IMAGE:"
+    elif which == "3":
         prompt="Break the above synopsis down using the 'Three act Structure' method \nACT I \nSETUP:"
-        
-        
+
+
     root = Tk()
     root.filename =  askopenfilename(initialdir = "/",title = "Select synopsis file",filetypes = (("text files","*.txt"),("all files","*.*")))
     #print (root.filename)
@@ -98,21 +95,21 @@ if __name__ == '__main__':
               folderpath=os. path. dirname(root.filename)
               root.destroy()
     #get thenumber of the file
-    print("synopsis name"+name)
+    print(f"synopsis name{name}")
     #print(scenename[-4:-7])
-    
 
 
-    scriptprompt="SYNOPSIS:\n"+synopsis+prompt    
+
+    scriptprompt="SYNOPSIS:\n"+synopsis+prompt
     print("QUERYING GPT3_____________________________________")
     completion="frogspawn"
     #print(scriptprompt)
     completion = gpt3_completion(scriptprompt)
     completion = completion.replace(r'\n', '\n')
     if which=="1":
-        completion="ORDINARY WORLD:"+completion
+        completion = f"ORDINARY WORLD:{completion}"
     if which=="2":
-        completion="OPENING IMAGE:"+completion
+        completion = f"OPENING IMAGE:{completion}"
     if which=="3":
         completion="ACT I \nSETUP:"+completion
     print(completion)
@@ -125,10 +122,10 @@ if __name__ == '__main__':
         root = Tk()
         root.filename =  asksaveasfilename(initialdir = "/",title = "Save breakdown",filetypes = (("text files","*.txt"),("all files","*.*")))
         print (root.filename)
-                        
-        with open(root.filename+".TXT", "w", encoding='utf-8') as f:
-           f.write(completion)  # write some data to the file               
-           root.mainloop()
+
+        with open(f"{root.filename}.TXT", "w", encoding='utf-8') as f:
+            f.write(completion)  # write some data to the file               
+            root.mainloop()
         root.destroy()
         
     

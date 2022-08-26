@@ -62,26 +62,24 @@ if __name__ == '__main__':
     print("This code assembles a script from numbered script files.")
     print("You'll need a series of files labeled SCRIPT_SCENE0001. SCRIPT_SCENE0002, etc)")
     getcha= input("choose an initial SCRIPT_SCENE0001 file (y/n):")
+    completion7=""
     if getcha== "y":
         root = Tk()
         root.filename =  askopenfilename(initialdir = "/",title = "Select Script file",filetypes = (("text files","*.txt"),("all files","*.*")))
         #print (root.filename)
         folderpath=os. path. dirname(root.filename)
-        completion7=""
         with open(root.filename, "r") as f:
             completion7 = f.read()
             root.destroy()
-    else:
-                completion7=""  
     #scenenum= input ("how many scenes are there?")
     #scn=int(scenenum)
     print(folderpath)
-    scenes = glob.glob(folderpath+"/SCRIPT_SCENE*")
+    scenes = glob.glob(f"{folderpath}/SCRIPT_SCENE*")
 
     scenes.sort()
     print (scenes)
 
-    with open(folderpath+"/full_script.txt", "w") as outfile:
+    with open(f"{folderpath}/full_script.txt", "w") as outfile:
         for f in scenes:
             with open(f) as infile:
                 outfile.write(infile.read())
